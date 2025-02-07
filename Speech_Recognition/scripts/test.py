@@ -14,7 +14,11 @@ def test(model, test_loader, device = "mps"):
 
             mfccs   = mfccs.to(device)
 
-            logits  = model(mfccs)
+            outputs = model(mfccs)
+            if isinstance(outputs, (tuple, list)):
+                logits = outputs[0]
+            else:
+                logits  = outputs
 
             ### Get most likely predicted phoneme with argmax
             predicted_phonemes = torch.argmax(logits, dim=1)

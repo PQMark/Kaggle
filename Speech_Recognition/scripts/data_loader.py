@@ -54,7 +54,7 @@ class DataModule:
 
 
 class AudioDataset:
-    def __init__(self, root, phonemes, partition, config, load_transcript=True):
+    def __init__(self, root, phonemes, partition, config, load_transcript=True, test=False):
         self.config = config
         self.context    = config["context"]
         self.phonemes   = phonemes
@@ -76,7 +76,10 @@ class AudioDataset:
         self.transcript_dir = os.path.join(root, partition, "transcript")
 
         # List MFCC files in sorted order
-        mfcc_names = sorted(os.listdir(self.mfcc_dir))
+        if test:
+            mfcc_names = sorted(os.listdir(self.mfcc_dir))
+        else:
+           mfcc_names = sorted(os.listdir(self.mfcc_dir), key=lambda x: [int(f) for f in x.replace(".npy", "").split('-')])
 
         # Subset
         subset_size = int(self.subset * len(mfcc_names))
@@ -85,7 +88,7 @@ class AudioDataset:
 
         # List transcripts files in sorted order
         if self.load_transcript:
-            transcript_names = sorted(os.listdir(self.transcript_dir))
+            transcript_names = sorted(os.listdir(self.transcript_dir), key=lambda x: [int(f) for f in x.replace(".npy", "").split('-')])      # sorted(os.listdir(self.transcript_dir))
             transcript_names = transcript_names[:subset_size]
             assert len(mfcc_names) == len(transcript_names)
         
@@ -171,13 +174,15 @@ class AudioDatasetModule(DataModule):
              partition=self.val_partition,
              config=self.config,
              load_transcript=True)
+          
         elif mode == "test":
             self.test_data = AudioDataset(
                 root=self.root, 
                 phonemes=self.phonemes,
                 partition=self.test_partition,
                 config=self.config,
-                load_transcript=False
+                load_transcript=False, 
+                test=True
             )
 
     def get_dataloader(self, train):

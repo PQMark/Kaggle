@@ -13,20 +13,26 @@ def eval(model, dataloader, criterion, device="mps"):
         phonemes    = phonemes.to(device)
 
         with torch.inference_mode():
+            outputs = model(frames)
+
             ### Forward Propagation
-            logits  = model(frames)
+            if isinstance(outputs, (tuple, list)):
+                main_logits = outputs[0]
+            else:
+                main_logits = outputs
+
             ### Loss Calculation
-            loss    = criterion(logits, phonemes)
+            loss    = criterion(main_logits, phonemes)
         
         vloss   += loss.item()
-        vacc    += torch.sum(torch.argmax(logits, dim= 1) == phonemes).item()/logits.shape[0]
+        vacc    += torch.sum(torch.argmax(main_logits, dim= 1) == phonemes).item()/main_logits.shape[0]
 
         batch_bar.set_postfix(loss="{:.04f}".format(float(vloss / (i + 1))),
                               acc="{:.04f}%".format(float(vacc*100 / (i + 1))))
         batch_bar.update()
 
         ### Release memory
-        del frames, phonemes, logits
+        del frames, phonemes, main_logits
         torch.mps.empty_cache()
 
     batch_bar.close()
