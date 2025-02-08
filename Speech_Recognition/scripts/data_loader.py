@@ -97,6 +97,7 @@ class AudioDataset:
         for i in tqdm(range(len(mfcc_names))):
             mfcc = np.load(os.path.join(self.mfcc_dir, mfcc_names[i]))
             mfccs_normalized = mfcc - np.mean(mfcc, axis=0, keepdims=True) # Cepstral Normalization at Time Dimension
+            mfccs_normalized /= (np.std(mfcc, axis=0, keepdims=True) + 1e-8)
             mfccs_normalized = torch.tensor(mfccs_normalized, dtype=torch.float32)
             self.mfccs.append(mfccs_normalized)
 
