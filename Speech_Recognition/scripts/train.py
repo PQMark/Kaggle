@@ -2,7 +2,7 @@ from tqdm import tqdm
 import torch 
 import wandb
 
-def train(model, dataloader, scheduler, optimizer, criterion, device="mps", log_batch=True, log_freq=10):
+def train(model, dataloader, scheduler, optimizer, criterion, device="mps", log_batch=True, log_freq=10, scaler=None):
     '''
     log_batch: whether log for batches
     '''
@@ -28,8 +28,8 @@ def train(model, dataloader, scheduler, optimizer, criterion, device="mps", log_
 
         # converts computations to a lower precision to speed up training and reduce memory usage
         
-        # with torch.autocast(device_type=device, dtype=torch.float16):
-        outputs = model(frames)
+        with torch.autocast(device_type=device, dtype=torch.float16):
+            outputs = model(frames)
         
         if isinstance(outputs, (tuple, list)):
             main_logits, aux_logits = outputs
@@ -40,15 +40,19 @@ def train(model, dataloader, scheduler, optimizer, criterion, device="mps", log_
             main_logits = outputs
             loss = criterion(outputs, phonemes)
             aux_loss = None
-        
-        # Backward Propagation
-        loss.backward()
 
         # gradient clipping if exploding gradients is an issue
         # ......
 
-        optimizer.step()
-        
+        if scaler is not None:
+            # Backward Propagation
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
+        else:
+            loss.backward()
+            optimizer.step()
+
         scheduler.step()
 
         batch_acc = torch.sum(torch.argmax(main_logits, dim= 1) == phonemes).item()/main_logits.shape[0]
@@ -82,7 +86,11 @@ def train(model, dataloader, scheduler, optimizer, criterion, device="mps", log_
         del frames, phonemes, main_logits
         if aux_loss is not None:
             del aux_loss
-        torch.mps.empty_cache()
+
+        if device.lower().startswith("cuda"):
+            torch.cuda.empty_cache()
+        elif device.lower().startswith("mps"):
+            torch.mps.empty_cache()
 
     batch_bar.close()
     tloss   /= len(dataloader)

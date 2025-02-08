@@ -33,7 +33,10 @@ def eval(model, dataloader, criterion, device="mps"):
 
         ### Release memory
         del frames, phonemes, main_logits
-        torch.mps.empty_cache()
+        if device.lower().startswith("cuda"):
+            torch.cuda.empty_cache()
+        elif device.lower().startswith("mps"):
+            torch.mps.empty_cache()
 
     batch_bar.close()
     vloss   /= len(dataloader)

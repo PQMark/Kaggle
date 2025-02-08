@@ -5,7 +5,7 @@ from scripts.eval import eval
 import os 
 
 class Trainer():
-    def __init__(self, num_epochs, criterion, optimizer, scheduler, patience, save_every, model_name, start=0, best_val_acc=0, device="mps", log_batch=True, log_freq=10):
+    def __init__(self, num_epochs, criterion, optimizer, scheduler, patience, save_every, model_name, start=0, best_val_acc=0, device="mps", log_batch=True, log_freq=10, scaler=None):
         self.num_epochs = num_epochs
         self.optimizer = optimizer
         self.criterion = criterion
@@ -19,14 +19,14 @@ class Trainer():
         self.model_name = model_name
         self.log_batch = log_batch
         self.log_freq = log_freq
+        self.scaler = scaler
 
     def fit(self, model, train_loader, val_loader, early_stopping=True, log=True, save_best=True, checkpoints=True):
+
+        model = model.to(self.device)
         current_patience = 0
 
         for epoch in range(self.start, self.num_epochs):
-
-            if epoch == 12000:
-                break
 
             print("\nEpoch {}/{}".format(epoch+1, self.num_epochs))
 
