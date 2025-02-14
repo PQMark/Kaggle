@@ -1,16 +1,55 @@
 # Speech Recognition 
 
+This project focuses on a MLP-based speech recognition model to effectively recognize and label the phoneme states in the training data. Below is an overview of the data preprocessing steps, model architecture, hyperparameters, and some alternative tried approaches.
+
+---
+
 ### Data Preprocessing
-MFCC data is Cepstral normalized along the time dimension, and is zero padded to the both ends to facilitate context division. Transcripts are cleaned by removing the start ([SOS]) and end ([EOS]) tokens. Phonemes in the transcripts are mapped to discrete numbers. During training, with a 70% probability, frequency masking or time masking are applied to the MFCCs to augment the data for robustness. 
+- **MFCC Features:**    
+The MFCC data is Cepstral normalized along the time axis, and zero-padded at both ends to help with context division.
+
+- **Transcripts:**  
+Transcripts are cleaned by removing the start (`[SOS]`) and end (`[EOS]`) tokens. Each phoneme in the transcript is then mapped to a discrete number.
+
+- **Data Augmentation:**  
+ During training, with a 70% probability, frequency masking or time masking are applied to the MFCCs to augment the data for robustness. 
+
+---
 
 ### Model Artitecture
 <img src="figs/architecture.png" alt="model archeitecture" width="600"/>
 
-SiLu activation is used. Dropout layer is added for A[1] - A[5] layers. 
+- **Activation Function:** SiLu  
+- **Dropout:** A dropout layer is added after layers A[1] through A[5].
+
+---
 
 ### Hyperparameters
-Layer outputs: [4096, 2048, 1024, 1024, 750, 512, 42]    
-Dropout rates: [0.2, 0.15, 0.15, ... ...]
+- **Layer Outputs:** `[4096, 2048, 1024, 1024, 750, 512, 42]`     
+- **Dropout Rates:** `[0.2, 0.15, 0.15, 0.15, 0.05, 0]` (for layers A[1] through A[6])    
+- **Number of Epochs:** `40`  
+- **Weight Initialization:** Xavier Normal   
+- **Optimizer:** AdamW (weight_decay = 0.01)  
+- **Learning Rate:** `1e-3`  
+- **LR Scheduler:** OneCycleLR  
+  Parameters: `max_lr=2e-3`, `pct_start=0.15`, `anneal_strategy="cos"`  
+- **Context:** `30` 
+- **Frequency Mask Parameter:** `4`
+- **Batch Size:** `2048`
 
-number of epoches
+---
+
+### Other Attempts 
+- **Mixer Architecture:**  
+  This approach was slow training speeds.
+- **Multi-Branch Architecture:**  
+The model has two branches, with the first one taking only the target frame as input and the other one processing the surrounding context. The two branches are merged via a fusion layer. The final loss is computed as a weighted sum of the main loss and the error from the frame branch. This design aimed to force the model to learn from the frame rather than relying too much on the context, but it introduced more parameters and numerical instability.
+
+- **MLP Architecture:**   
+ This model used layer output sizes of: `[2048, 1024, 2048, 2048, 1024, 1024, 42]`. However, it struggled to achieve an accuracy above 85.5%.
+
+---
+
+### Ablations
+
 
