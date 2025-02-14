@@ -51,5 +51,6 @@ The model has two branches, with the first one taking only the target frame as i
 ---
 
 ### Ablations
-
+- **Link to Wandb**  
+https://wandb.ai/11785-DL/HW1P2?nw=nwuserpeng_qiu
 
