@@ -31,7 +31,7 @@ class Trainer():
             print("\nEpoch {}/{}".format(epoch+1, self.num_epochs))
 
             curr_lr                 = float(self.optimizer.param_groups[0]['lr'])
-            train_loss, train_acc   = train(model, train_loader, self.scheduler, self.optimizer, self.criterion, self.device, self.log_batch, self.log_freq)
+            train_loss, train_acc   = train(model, train_loader, self.scheduler, self.optimizer, self.criterion, self.device, self.log_batch, self.log_freq, scaler=self.scaler)
             val_loss, val_acc       = eval(model, val_loader, self.criterion, self.device)
 
             print("\tTrain Acc {:.04f}%\tTrain Loss {:.04f}\t Learning Rate {:.07f}".format(train_acc*100, train_loss, curr_lr))

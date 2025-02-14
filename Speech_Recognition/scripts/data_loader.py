@@ -76,10 +76,7 @@ class AudioDataset:
         self.transcript_dir = os.path.join(root, partition, "transcript")
 
         # List MFCC files in sorted order
-        if test:
-            mfcc_names = sorted(os.listdir(self.mfcc_dir))
-        else:
-           mfcc_names = sorted(os.listdir(self.mfcc_dir), key=lambda x: [int(f) for f in x.replace(".npy", "").split('-')])
+        mfcc_names = sorted(os.listdir(self.mfcc_dir))
 
         # Subset
         subset_size = int(self.subset * len(mfcc_names))
@@ -88,7 +85,7 @@ class AudioDataset:
 
         # List transcripts files in sorted order
         if self.load_transcript:
-            transcript_names = sorted(os.listdir(self.transcript_dir), key=lambda x: [int(f) for f in x.replace(".npy", "").split('-')])      # sorted(os.listdir(self.transcript_dir))
+            transcript_names = sorted(os.listdir(self.transcript_dir))      # sorted(os.listdir(self.transcript_dir))
             transcript_names = transcript_names[:subset_size]
             assert len(mfcc_names) == len(transcript_names)
         
@@ -96,8 +93,10 @@ class AudioDataset:
         self.mfccs, self.transcripts = [], []
         for i in tqdm(range(len(mfcc_names))):
             mfcc = np.load(os.path.join(self.mfcc_dir, mfcc_names[i]))
-            mfccs_normalized = mfcc - np.mean(mfcc, axis=0, keepdims=True) # Cepstral Normalization at Time Dimension
-            mfccs_normalized /= (np.std(mfcc, axis=0, keepdims=True) + 1e-8)
+            mfcc_mean = np.mean(mfcc, axis=0, keepdims=True) # Cepstral Normalization at Time Dimension
+            mfcc_std = np.std(mfcc, axis=0, keepdims=True) + 1e-8
+            mfccs_normalized = (mfcc - mfcc_mean) / mfcc_std
+
             mfccs_normalized = torch.tensor(mfccs_normalized, dtype=torch.float32)
             self.mfccs.append(mfccs_normalized)
 
@@ -105,7 +104,7 @@ class AudioDataset:
             if self.load_transcript:
                 transcript = np.load(os.path.join(self.transcript_dir, transcript_names[i]))
                 transcript  = transcript[1:-1]
-            
+
                 # map to ID 
                 transcript_indices = np.array([self.phonemes_map[p] for p in transcript]) 
                 transcript_indices = torch.tensor(transcript_indices, dtype=torch.int64)
@@ -117,12 +116,12 @@ class AudioDataset:
 
         # Concatenate all transcripts
         if self.load_transcript:
-          self.transcripts = torch.cat(self.transcripts, 0)   # shape: (T,)
+           self.transcripts = torch.cat(self.transcripts, 0)   # shape: (T,)
 
         self.length = len(self.mfccs)
 
         # introduce context by padding zeros on top and bottom of self.mfcc
-        self.mfccs = F.pad(self.mfccs, (0, 0, config["context"], config["context"]), mode="constant")
+        self.mfccs = F.pad(self.mfccs, (0, 0, self.context, self.context), mode="constant")
     
     def collate_fn(self, batch):
       x, y = zip(*batch)
@@ -143,6 +142,7 @@ class AudioDataset:
     def __getitem__(self, ind):
         start = ind 
         end = ind + self.context * 2 + 1
+
         frames = self.mfccs[start:end]
 
         if self.load_transcript:
