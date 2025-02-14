@@ -54,7 +54,7 @@ The model has two branches, with the first one taking only the target frame as i
 <img src="figs/ablation.png" alt="model ablation" width="600"/>
 
 - **Results:**   
-The first two layers have the greatest impact on overall performance. Reducing their output size to around 2000, even while keeping the model depth unchanged, still greatly compromises performance.
+The first two layers have the greatest impact on overall performance. Cutting these layers impairs the model. In experiments, even reducing their output size to around 2000, while keeping the model depth unchanged, greatly compromises performance.
 
 - **Link to Wandb:**  
 https://wandb.ai/11785-DL/HW1P2?nw=nwuserpeng_qiu
