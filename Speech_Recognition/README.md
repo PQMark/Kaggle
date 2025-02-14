@@ -41,7 +41,7 @@ Transcripts are cleaned by removing the start (`[SOS]`) and end (`[EOS]`) tokens
 
 ### Other Attempts 
 - **Mixer Architecture:**  
-  This approach was slow training speeds.
+  This approach was too slow in training speed.
 - **Multi-Branch Architecture:**  
 The model has two branches, with the first one taking only the target frame as input and the other one processing the surrounding context. The two branches are merged via a fusion layer. The final loss is computed as a weighted sum of the main loss and the error from the frame branch. This design aimed to force the model to learn from the frame rather than relying too much on the context, but it introduced more parameters and numerical instability.
 
@@ -50,7 +50,12 @@ The model has two branches, with the first one taking only the target frame as i
 
 ---
 
-### Ablations
-- **Link to Wandb**  
+### Ablation 
+<img src="figs/ablation.png" alt="model ablation" width="600"/>
+
+- **Results:**   
+The first two layers have the greatest impact on overall performance. Reducing their output size to around 2000, even while keeping the model depth unchanged, still greatly compromises performance.
+
+- **Link to Wandb:**  
 https://wandb.ai/11785-DL/HW1P2?nw=nwuserpeng_qiu
 
