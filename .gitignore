@@ -2,3 +2,4 @@ Speech_Recognition/data
 Speech_Recognition/checkpoints
 Speech_Recognition/wandb
 .DS_Store
+*.pyc
