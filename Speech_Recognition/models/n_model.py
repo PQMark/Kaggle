@@ -11,6 +11,7 @@ class DenseNet(nn.Module):
             dropout_list = [dropout] * len(arch)
         else:
             assert len(dropout) == len(arch), "Length of dropout list must equal number of layers in 'arch'"
+            dropout_list = dropout
 
         blk = []
         for num_hidden, drop in zip(arch, dropout_list):

@@ -5,7 +5,7 @@ from scripts.eval import eval
 import os 
 
 class Trainer():
-    def __init__(self, num_epochs, criterion, optimizer, scheduler, patience, save_every, model_name, start=0, best_val_acc=0, device="mps", log_batch=True, log_freq=10, scaler=None):
+    def __init__(self, num_epochs, criterion, optimizer, scheduler, patience, save_every, model_name, start=0, best_val_acc=0, device="mps", scaler=None):
         self.num_epochs = num_epochs
         self.optimizer = optimizer
         self.criterion = criterion
@@ -17,11 +17,9 @@ class Trainer():
         self.scheduler = scheduler
         self.save_every = save_every
         self.model_name = model_name
-        self.log_batch = log_batch
-        self.log_freq = log_freq
         self.scaler = scaler
 
-    def fit(self, model, train_loader, val_loader, early_stopping=True, log=True, save_best=True, checkpoints=True):
+    def fit(self, model, train_loader, val_loader, early_stopping=True, log_epoch=True, log_batch=True, log_freq=10, save_best=True, checkpoints=True):
 
         model = model.to(self.device)
         current_patience = 0
@@ -31,13 +29,13 @@ class Trainer():
             print("\nEpoch {}/{}".format(epoch+1, self.num_epochs))
 
             curr_lr                 = float(self.optimizer.param_groups[0]['lr'])
-            train_loss, train_acc   = train(model, train_loader, self.scheduler, self.optimizer, self.criterion, self.device, self.log_batch, self.log_freq, scaler=self.scaler)
+            train_loss, train_acc   = train(model, train_loader, self.scheduler, self.optimizer, self.criterion, self.device, log_batch, log_freq, scaler=self.scaler)
             val_loss, val_acc       = eval(model, val_loader, self.criterion, self.device)
 
             print("\tTrain Acc {:.04f}%\tTrain Loss {:.04f}\t Learning Rate {:.07f}".format(train_acc*100, train_loss, curr_lr))
             print("\tVal Acc {:.04f}%\tVal Loss {:.04f}".format(val_acc*100, val_loss))
 
-            if log:
+            if log_epoch:
                 ## Log metrics at each epoch in your run
                 # Optionally, you can log at each batch inside train/eval functions
                 # (explore wandb documentation/wandb recitation)
