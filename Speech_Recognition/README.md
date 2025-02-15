@@ -59,3 +59,5 @@ The first two layers have the greatest impact on overall performance. Cutting th
 - **Link to Wandb:**  
 https://wandb.ai/11785-DL/HW1P2?nw=nwuserpeng_qiu
 
+### Run the Code  
+- The main script is in `main.ipynb`. Follow the instructions there to run it. 
