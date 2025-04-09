@@ -38,6 +38,9 @@ This project focuses on building a CNN-based model for effective face recognitio
 - A global average pooling layer reduces spatial dimensions to 1×1.
 - A fully connected classification layer
 
+### Loss Function
+- **ArcFace Loss**
+
 
 
 ## Ablation 

@@ -82,7 +82,6 @@ class AudioDataset:
         subset_size = int(self.subset * len(mfcc_names))
         mfcc_names = mfcc_names[:subset_size]
 
-
         # List transcripts files in sorted order
         if self.load_transcript:
             transcript_names = sorted(os.listdir(self.transcript_dir))      # sorted(os.listdir(self.transcript_dir))

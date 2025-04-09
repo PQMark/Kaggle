@@ -1,5 +1,4 @@
-Speech_Recognition/data
-Speech_Recognition/checkpoints
-Speech_Recognition/wandb
+*/data
 .DS_Store
 *.pyc
+**/__pycache__

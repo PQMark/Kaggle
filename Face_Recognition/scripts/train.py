@@ -61,8 +61,8 @@ def train_epoch(model, dataloader, optimizer, criterion, lr_scheduler, scaler, d
         batch_bar.update() 
 
         # You may want to call some schedulers inside the train function. What are these?
-        # if lr_scheduler is not None:
-        #     lr_scheduler.step()
+        if lr_scheduler is not None:
+            lr_scheduler.step()
 
         if log_batch and i % log_freq == 0:
             current_lr = optimizer.param_groups[0]['lr']

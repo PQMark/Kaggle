@@ -16,7 +16,7 @@ Transcripts are cleaned by removing the start (`[SOS]`) and end (`[EOS]`) tokens
 
 ---
 
-### Model Artitecture
+### Model Architecture
 <img src="figs/architecture.png" alt="model archeitecture" width="600"/>
 
 - **Activation Function:** SiLu  
